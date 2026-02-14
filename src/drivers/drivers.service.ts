@@ -8,10 +8,11 @@ export class DriversService {
   constructor(private prisma: PrismaService){}
 
 
-  create(createDriverDto: CreateDriverDto) {
-    return this.prisma.driver.create({
+  async create(createDriverDto: CreateDriverDto) {
+    const newDriver = await this.prisma.driver.create({
       data: createDriverDto,
     });
+    return newDriver;
   }
 
   findAll() {

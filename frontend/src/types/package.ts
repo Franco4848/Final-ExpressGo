@@ -10,6 +10,7 @@ export interface Package{
     status?: PackageStatus;
     lat: number;
     lng: number;
+    deliveryOrder?: number;
     driverId?: string;
     driver?: {id: string, name: string}
 }

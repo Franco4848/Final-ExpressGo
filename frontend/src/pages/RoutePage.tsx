@@ -6,13 +6,54 @@ import { getDriverRoute } from "../services/routes.service";
 import type { Driver } from "../types/driver";
 import type { Package, PackageStatus } from "../types/package";
 
+import {DndContext, closestCenter,} from "@dnd-kit/core";
+import type {DragEndEvent} from "@dnd-kit/core";
+import {SortableContext,verticalListSortingStrategy,useSortable,arrayMove,} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+import {reorderDriverRoute} from "../services/routes.service"
+
+
+
 function markerColor(status: PackageStatus) {
   if (status === "ENTREGADO") return "✅";
   if (status === "EN_CAMINO") return "🚚";
   return "📦";
 }
 
+function SortableStopItem({
+  id,
+  children,
+}: {
+  id: string;
+  children: React.ReactNode;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    padding: 10,
+    border: "1px solid #ddd",
+    borderRadius: 8,
+    background: "white",
+    opacity: isDragging ? 0.7 : 1,
+    cursor: "grab",
+  };
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      {children}
+    </div>
+  );
+}
+
+
 export default function RoutePage() {
+  
+
+
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -21,6 +62,31 @@ export default function RoutePage() {
   // ✅ NUEVO: stops y geometry vienen del backend
   const [stops, setStops] = useState<Package[]>([]);
   const [geometry, setGeometry] = useState<[number, number][]>([]);
+  async function onDragEnd(event: DragEndEvent) {
+  const { active, over } = event;
+  if (!over) return;
+  if (active.id === over.id) return;
+
+  const oldIndex = stops.findIndex((s) => s.id === active.id);
+  const newIndex = stops.findIndex((s) => s.id === over.id);
+
+  if (oldIndex === -1 || newIndex === -1) return;
+
+  const newStops = arrayMove(stops, oldIndex, newIndex);
+  setStops(newStops);
+
+  try {
+    const orderedIds = newStops.map((s) => s.id);
+    const res = await reorderDriverRoute(selectedDriverId, orderedIds);
+
+    setStops(res.data.stops);
+    setGeometry(res.data.route.geometry);
+  } catch (err) {
+    console.error(err);
+    alert("No se pudo guardar el nuevo orden");
+  }
+}
+
 
   // 1) cargar drivers al inicio
   useEffect(() => {
@@ -34,6 +100,8 @@ export default function RoutePage() {
       }
     }
     loadDrivers();
+    
+
   }, []);
 
   // 2) cargar ruta cada vez que cambia el driver seleccionado
@@ -160,25 +228,33 @@ export default function RoutePage() {
             ) : stops.length === 0 ? (
               <p>Este driver no tiene paquetes asignados.</p>
             ) : (
-              <ol style={{ display: "grid", gap: 10 }}>
-                {stops.map((p) => (
-                  <li key={p.id}>
-                    <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
-                      <div>
-                        {markerColor(p.status ?? "PENDIENTE")} <b>{p.trackingId}</b> — {p.recipientName}
-                        <div style={{ fontSize: 12, opacity: 0.8 }}>{p.address}</div>
-                        <div style={{ fontSize: 12 }}>Estado: {p.status ?? "PENDIENTE"}</div>
-                      </div>
+              <DndContext collisionDetection={closestCenter} onDragEnd={onDragEnd}>
+  <SortableContext
+    items={stops.map((s) => s.id)}
+    strategy={verticalListSortingStrategy}
+  >
+    <div style={{ display: "grid", gap: 10 }}>
+      {stops.map((p) => (
+        <SortableStopItem key={p.id} id={p.id}>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+            <div>
+              {markerColor(p.status ?? "PENDIENTE")} <b>{p.trackingId}</b> — {p.recipientName}
+              <div style={{ fontSize: 12, opacity: 0.8 }}>{p.address}</div>
+              <div style={{ fontSize: 12 }}>
+                Estado: {p.status ?? "PENDIENTE"} | Orden: {p.deliveryOrder ?? "—"}
+              </div>
+            </div>
 
-                      {(p.status ?? "PENDIENTE") !== "ENTREGADO" && (
-                        <button onClick={() => markDelivered(p)}>
-                          Entregado
-                        </button>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ol>
+            {(p.status ?? "PENDIENTE") !== "ENTREGADO" && (
+              <button onClick={() => markDelivered(p)}>Entregado</button>
+            )}
+          </div>
+        </SortableStopItem>
+      ))}
+    </div>
+  </SortableContext>
+</DndContext>
+
             )}
           </div>
         </div>

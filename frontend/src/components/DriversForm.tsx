@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import type { CreateDriverDto } from "../types/driver";
+import { Paper, Stack, TextField, Button, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
+import type { SelectChangeEvent } from "@mui/material/Select";
 
 interface DriverFormProps {
   onSubmit: (data: CreateDriverDto) => Promise<void>;
@@ -30,12 +32,18 @@ export default function DriverForm({
     else setFormData(emptyForm);
   }, [initialData]);
 
-  function handleChange(
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  }
+    function handleTextChange(
+      e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) {
+      const { name, value } = e.target;
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+
+    function handleSelectChange(e: SelectChangeEvent) {
+      const { name, value } = e.target;
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
+
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -58,50 +66,64 @@ export default function DriverForm({
   }
 
   return (
+    <Paper sx={{ p:2 }}>
+      <h2>Crear driver</h2>
+
     <form onSubmit={handleSubmit} style={{ display: "grid", gap: 12, maxWidth: 400 }}>
-      <input
-        type="text"
-        name="name"
-        placeholder="Nombre"
-        value={formData.name}
-        onChange={handleChange}
-        required
-      />
 
-      <input
-        type="email"
-        name="email"
-        placeholder="Email"
-        value={formData.email}
-        onChange={handleChange}
-        required
-      />
+        <Stack spacing={2}>
+          <TextField
+            label="Nombre"
+            name="name"
+            value={formData.name}
+            onChange={handleTextChange}
+            required
+          />
 
-      <select name="vehicle" value={formData.vehicle} onChange={handleChange}>
-        <option value="Moto">Moto</option>
-        <option value="Auto">Auto</option>
-        <option value="camioneta">camioneta</option>
-      </select>
+          <TextField
+            label="Email"
+            name="email"
+            value={formData.email}
+            onChange={handleTextChange}
+            required
+          />
+        <FormControl>
+          <InputLabel id="vehicle-label">Vehículo</InputLabel>
+          <Select
+            labelId="vehicle-label"
+            label="Vehículo" 
+            name="vehicle" 
+            value={formData.vehicle} 
+            onChange={handleSelectChange}
+          >
 
-      <input
-        type="text"
-        name="phone"
-        placeholder="Teléfono (opcional)"
-        value={formData.phone || ""}
-        onChange={handleChange}
-      />
+            <MenuItem value="Moto">Moto</MenuItem>
+            <MenuItem value="Auto">Auto</MenuItem>
+            <MenuItem value="Camioneta">Camioneta</MenuItem>
+          </Select>
+        </FormControl>
 
-      <div style={{ display: "flex", gap: 8 }}>
-        <button type="submit" disabled={loading}>
-          {loading ? "Guardando..." : mode === "edit" ? "Actualizar" : "Crear"}
-        </button>
+        <TextField
+          label="Phone"
+          name="phone"
+          value={formData.phone || ""}
+          onChange={handleTextChange}
+        />
 
-        {mode === "edit" && (
-          <button type="button" onClick={onCancelEdit} disabled={loading}>
-            Cancelar
-          </button>
-        )}
-      </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            <Button type="submit" variant="outlined" disabled={loading}>
+              {loading ? "Guardando..." : mode === "edit" ? "Actualizar" : "Crear"}
+            </Button>
+
+            {mode === "edit" && (
+              <Button type="button" onClick={onCancelEdit} disabled={loading}>
+                Cancelar
+              </Button>
+            )}
+          </div>
+        </Stack>
+
     </form>
+    </Paper>
   );
 }

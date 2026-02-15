@@ -2,6 +2,16 @@ import { useEffect, useState } from "react";
 import DriverForm from "../components/DriversForm";
 import type { Driver, CreateDriverDto } from "../types/driver";
 import { getDrivers, createDriver, deleteDriver, updateDriver } from "../services/drivers.service";
+import { Box, Divider, Paper, Stack, Typography } from "@mui/material";
+import {
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  IconButton, Chip
+} from "@mui/material";
+
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+
+
 
 export default function DriversPage() {
   const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -52,49 +62,90 @@ export default function DriversPage() {
   }, []);
 
   return (
-    <div>
-      <h2>Drivers</h2>
+    <Box sx={{ display: "grid", gap: 2 }}>
+      <Typography variant="h4" sx={{ fontWeight: 800 }}>
+        Drivers
+      </Typography>
 
-      <h3 style={{ marginTop: 10 }}>
-        {editingDriver ? `Editando: ${editingDriver.name}` : "Crear driver"}
-      </h3>
+     
 
-      <DriverForm
-        mode={editingDriver ? "edit" : "create"}
-        initialData={
-          editingDriver
-            ? {
-                name: editingDriver.name,
-                email: editingDriver.email,
-                vehicle: editingDriver.vehicle,
-                phone: editingDriver.phone,
-              }
-            : undefined
-        }
-        onSubmit={editingDriver ? handleUpdate : handleCreate}
-        onCancelEdit={() => setEditingDriver(null)}
-      />
+      <Paper>
+        <DriverForm
+          mode={editingDriver ? "edit" : "create"}
+          initialData={
+            editingDriver
+              ? {
+                  name: editingDriver.name,
+                  email: editingDriver.email,
+                  vehicle: editingDriver.vehicle,
+                  phone: editingDriver.phone,
+                }
+              : undefined
+          }
+          onSubmit={editingDriver ? handleUpdate : handleCreate}
+          onCancelEdit={() => setEditingDriver(null)}
+        />
+      </Paper>
 
-      <hr style={{ margin: "20px 0" }} />
+      <Divider style={{ margin: "20px 0" }} />
 
-      <ul style={{ display: "grid", gap: 10, paddingLeft: 16 }}>
-        {drivers.map((d) => (
-          <li key={d.id} style={{ display: "flex", gap: 12, alignItems: "center" }}>
-            <div style={{ flex: 1 }}>
-              <b>{d.name}</b> — {d.email} — {d.vehicle}
-              {d.phone ? ` — ${d.phone}` : ""}
-            </div>
+      <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell><b>Nombre</b></TableCell>
+                <TableCell><b>Email</b></TableCell>
+                <TableCell><b>Vehículo</b></TableCell>
+                <TableCell><b>Teléfono</b></TableCell>
+                <TableCell align="right"><b>Acciones</b></TableCell>
+              </TableRow>
+            </TableHead>
 
-            <button onClick={() => setEditingDriver(d)} disabled={deletingId === d.id}>
-              Editar
-            </button>
+            <TableBody>
+              {drivers.map((d) => (
+                <TableRow key={d.id} hover>
+                  <TableCell>{d.name}</TableCell>
+                  <TableCell>{d.email}</TableCell>
+                  <TableCell>
+                    <Chip
+                      label={d.vehicle}
+                      size="small"
+                      variant="outlined"
+                      color={d.vehicle === "Moto" ? "warning" : "success"}
+                    />
+                  </TableCell>
+                  <TableCell>{d.phone ?? "—"}</TableCell>
 
-            <button onClick={() => handleDelete(d.id)} disabled={deletingId === d.id}>
-              {deletingId === d.id ? "Eliminando..." : "Eliminar"}
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
+                  <TableCell align="right">
+                    <IconButton
+                      onClick={() => setEditingDriver(d)}
+                      disabled={deletingId === d.id}
+                    >
+                      <EditIcon />
+                    </IconButton>
+
+                    <IconButton
+                      color="error"
+                      onClick={() => handleDelete(d.id)}
+                      disabled={deletingId === d.id}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+
+              {drivers.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={5} align="center" sx={{ py: 4, opacity: 0.7 }}>
+                    No hay drivers registrados.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+      </TableContainer>
+
+    </Box>
   );
 }

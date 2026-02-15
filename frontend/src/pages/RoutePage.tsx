@@ -12,6 +12,7 @@ import {SortableContext,verticalListSortingStrategy,useSortable,arrayMove,} from
 import { CSS } from "@dnd-kit/utilities";
 
 import {reorderDriverRoute} from "../services/routes.service"
+import { MenuItem, Select, FormControl, InputLabel } from "@mui/material";
 
 
 
@@ -168,14 +169,26 @@ export default function RoutePage() {
 
       <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 12 }}>
         <label>Driver:</label>
-        <select value={selectedDriverId} onChange={(e) => setSelectedDriverId(e.target.value)}>
-          <option value="">Seleccionar...</option>
-          {drivers.map((d) => (
-            <option key={d.id} value={d.id}>
-              {d.name}
-            </option>
-          ))}
-        </select>
+        <FormControl size="small" sx={{minWidth:220}}>
+          <InputLabel id="driver-label">Driver</InputLabel>
+
+            <Select
+            labelId="driver-label" 
+            value={selectedDriverId}
+            label="Seleccionar"
+            onChange={(e) => setSelectedDriverId(e.target.value)}
+            >
+              <MenuItem value="">
+                <em>Seleccionar...</em>
+              </MenuItem>
+
+              {drivers.map((d) => (
+                <MenuItem key={d.id} value={d.id}>
+                  {d.name}
+                </MenuItem>
+              ))}
+            </Select>
+        </FormControl>
 
         <span style={{ opacity: 0.8 }}>
           Paradas: {stops.length}

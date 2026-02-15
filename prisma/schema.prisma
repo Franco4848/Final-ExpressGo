@@ -40,7 +40,7 @@ model Package {
   lng           Float
   
   // Orden de entrega (para la ruta)
-  deliveryOrder Int?
+  deliveryOrder Int @default(0)
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -48,4 +48,5 @@ model Package {
   // Relación: Un paquete pertenece a un Repartidor (puede ser nulo si no se asignó aún)
   driverId      String?  @db.ObjectId
   driver        Driver?  @relation(fields: [driverId], references: [id])
+
 }

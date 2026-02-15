@@ -32,7 +32,4 @@ export class CreatePackageDto {
     @IsOptional() // Al crearlo, puede que aún no tenga chofer asignado
     driverId?: string;
 
-
-
-
 }

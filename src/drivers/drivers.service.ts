@@ -42,4 +42,14 @@ export class DriversService {
     });  
     return `This action removes a #${id} driver`;
   }
+  
+  async getDriverStopsOrdered(driverId: string) {
+  return this.prisma.package.findMany({
+    where: { driverId },
+  // por ahora: un orden estable
+    orderBy: { createdAt: "asc" },
+    });
+  }
 }
+
+

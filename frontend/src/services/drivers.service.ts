@@ -5,3 +5,6 @@ export const getDrivers = () => api.get("/drivers");
 
 export const createDriver = (data: CreateDriverDto) =>
   api.post("/drivers", data);
+
+export const deleteDriver = (id: string) => 
+    api.delete(`/drivers/${id}`);

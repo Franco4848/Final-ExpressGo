@@ -2,6 +2,8 @@ import { Link, Routes, Route, Navigate } from "react-router-dom";
 import DriversPage from "./pages/DriversPage";
 import PackagesPage from "./pages/PackagesPage";
 import RoutePage from "./pages/RoutePage";
+import DashboardPage from "./pages/DashboardPage";
+
 
 export default function App() {
   return (
@@ -10,6 +12,7 @@ export default function App() {
         <Link to="/drivers">Drivers</Link>
         <Link to="/packages">Packages</Link>
         <Link to="/route">Ruta</Link>
+        <Link to="/dashboard">Dashboard</Link>
       </nav>
 
       <Routes>
@@ -22,6 +25,8 @@ export default function App() {
 
         {/* 404 simple */}
         <Route path="*" element={<p>Página no encontrada</p>} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+
       </Routes>
     </div>
   );

@@ -11,7 +11,7 @@ export class PackagesService {
     const newPackage = await this.prisma.package.create({
       data: createPackageDto
     })
-    return 'Pedido creado correctamente';
+    return newPackage;
   }
 
   findAll() {

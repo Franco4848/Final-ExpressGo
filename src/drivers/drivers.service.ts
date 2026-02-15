@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma.service';
+import { PrismaService } from '../prisma.service';
 import { CreateDriverDto } from './dto/create-driver.dto';
 import { UpdateDriverDto } from './dto/update-driver.dto';
 
@@ -49,7 +49,7 @@ export class DriversService {
       orderBy: [{ deliveryOrder: "asc" }, { createdAt: "asc" }], // fallback
     });
   }
-  
+
   async reorderRoute(driverId: string, orderedPackageIds: string[]) {
   // validar que esos packages sean del driver
   const existing = await this.prisma.package.findMany({

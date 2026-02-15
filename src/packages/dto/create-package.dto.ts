@@ -1,4 +1,4 @@
-import { IsIn, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator"
+import { IsIn, IsInt, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from "class-validator"
 
 export class CreatePackageDto {
     @IsString()
@@ -27,6 +27,11 @@ export class CreatePackageDto {
 
     @IsNumber()
     lng: number;
+
+    @IsInt()
+    @Min(1)
+    @IsOptional()
+    deliveryOrder?: number
 
     @IsMongoId() // Valida que sea un ID de Mongo real
     @IsOptional() // Al crearlo, puede que aún no tenga chofer asignado

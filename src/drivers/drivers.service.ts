@@ -44,12 +44,38 @@ export class DriversService {
   }
   
   async getDriverStopsOrdered(driverId: string) {
-  return this.prisma.package.findMany({
-    where: { driverId },
-  // por ahora: un orden estable
-    orderBy: { createdAt: "asc" },
+    return this.prisma.package.findMany({
+      where: { driverId },
+      orderBy: [{ deliveryOrder: "asc" }, { createdAt: "asc" }], // fallback
     });
   }
+  
+  async reorderRoute(driverId: string, orderedPackageIds: string[]) {
+  // validar que esos packages sean del driver
+  const existing = await this.prisma.package.findMany({
+    where: { id: { in: orderedPackageIds }, driverId },
+    select: { id: true },
+  });
+
+  if (existing.length !== orderedPackageIds.length) {
+    throw new Error("Hay paquetes que no pertenecen a este driver");
+  }
+
+  // Actualizar deliveryOrder según el orden recibido
+  const ops = orderedPackageIds.map((id, idx) =>
+    this.prisma.package.update({
+      where: { id },
+      data: { deliveryOrder: idx + 1 },
+    })
+  );
+
+  await this.prisma.$transaction(ops);
+
+  // devolver stops ya ordenados
+  return this.getDriverStopsOrdered(driverId);
+}
+
+
 }
 
 

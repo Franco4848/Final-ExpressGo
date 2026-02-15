@@ -1,4 +1,4 @@
-import { IsIn, IsInt, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from "class-validator"
+import { IsIn, IsInt, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString, Min, Max } from "class-validator"
 
 export class CreatePackageDto {
     @IsString()
@@ -23,9 +23,13 @@ export class CreatePackageDto {
     status?: string;
 
     @IsNumber()
+    @Min(-90)
+    @Max(90)
     lat: number;
 
     @IsNumber()
+    @Min(-180)
+    @Max(180)
     lng: number;
 
     @IsInt()

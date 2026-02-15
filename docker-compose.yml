@@ -1,0 +1,48 @@
+services:
+  # 1. Base de Datos (MongoDB con Replica Set Automático)
+  mongo:
+    image: mongo:7
+    container_name: expressgo_db
+    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: |
+        test $$(mongosh --quiet --eval "try { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'mongo:27017' }] }).ok } catch (_) { rs.status().ok }") -eq 1
+      interval: 10s
+      start_period: 5s
+
+  # 2. Backend (NestJS)
+  backend:
+    build: ./backend
+    container_name: expressgo_backend
+    ports:
+      - "3000:3000"
+    environment:
+      # OJO: Aquí 'localhost' se cambia por 'mongo' (el nombre del servicio de arriba)
+      - DATABASE_URL=mongodb://mongo:27017/express-go?replicaSet=rs0
+    depends_on:
+      mongo:
+        condition: service_healthy # Espera a que la réplica esté lista
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  # 3. Frontend (React + Vite)
+  frontend:
+    build: ./frontend
+    container_name: expressgo_frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:3000
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+volumes:
+  mongodb_data:

@@ -1,15 +1,22 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "leaflet/dist/leaflet.css";
-import "./components/leafletFix";
-import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 
+import { ThemeProvider } from "@mui/material/styles";
+import { theme } from "./theme";
+import CssBaseline from "@mui/material/CssBaseline";
+
+import "leaflet/dist/leaflet.css";
+import "./components/leafletFix";
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </ThemeProvider>
   </React.StrictMode>
 );

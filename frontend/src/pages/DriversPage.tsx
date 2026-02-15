@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import DriverForm from "../components/DriversForm";
 import type { Driver, CreateDriverDto } from "../types/driver";
-import { getDrivers, createDriver, deleteDriver } from "../services/drivers.service";
+import { getDrivers, createDriver, deleteDriver, updateDriver } from "../services/drivers.service";
 
 export default function DriversPage() {
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  //Driver seleccionado para editar
+  const [editingDriver, setEditingDriver] = useState<Driver |null>(null);
 
   async function loadDrivers() {
     const res = await getDrivers();
@@ -17,6 +20,13 @@ export default function DriversPage() {
     await loadDrivers();
   }
 
+  async function handleUpdate(data: CreateDriverDto){
+    if (!editingDriver) return;
+    await updateDriver(editingDriver.id, data);
+    setEditingDriver(null);
+    await loadDrivers();
+  }
+
   async function handleDelete(id: string){
     const ok = confirm("Seguro de que queres eleiminar este driver?")
     if(!ok) return;
@@ -24,6 +34,7 @@ export default function DriversPage() {
         setDeletingId(id);
         await deleteDriver(id);
         await loadDrivers();
+        if(editingDriver?.id === id) setEditingDriver(null);
     }catch(err: any){
         console.error(err);
         alert(
@@ -44,7 +55,25 @@ export default function DriversPage() {
     <div>
       <h2>Drivers</h2>
 
-      <DriverForm onSubmit={handleCreate} />
+      <h3 style={{ marginTop: 10 }}>
+        {editingDriver ? `Editando: ${editingDriver.name}` : "Crear driver"}
+      </h3>
+
+      <DriverForm
+        mode={editingDriver ? "edit" : "create"}
+        initialData={
+          editingDriver
+            ? {
+                name: editingDriver.name,
+                email: editingDriver.email,
+                vehicle: editingDriver.vehicle,
+                phone: editingDriver.phone,
+              }
+            : undefined
+        }
+        onSubmit={editingDriver ? handleUpdate : handleCreate}
+        onCancelEdit={() => setEditingDriver(null)}
+      />
 
       <hr style={{ margin: "20px 0" }} />
 
@@ -56,10 +85,11 @@ export default function DriversPage() {
               {d.phone ? ` — ${d.phone}` : ""}
             </div>
 
-            <button
-              onClick={() => handleDelete(d.id)}
-              disabled={deletingId === d.id}
-            >
+            <button onClick={() => setEditingDriver(d)} disabled={deletingId === d.id}>
+              Editar
+            </button>
+
+            <button onClick={() => handleDelete(d.id)} disabled={deletingId === d.id}>
               {deletingId === d.id ? "Eliminando..." : "Eliminar"}
             </button>
           </li>

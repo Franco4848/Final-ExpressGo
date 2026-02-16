@@ -6,9 +6,15 @@ import PackagesPage from "./pages/PackagesPage";
 import RoutePage from "./pages/RoutePage";
 import DashboardPage from "./pages/DashboardPage";
 
-export default function App() {
+export default function App({
+  mode,
+  onToggleMode,
+}: {
+  mode: "light" | "dark";
+  onToggleMode: () => void;
+}) {
   return (
-    <AppShell>
+    <AppShell mode={mode} onToggleMode={onToggleMode}>
       <Routes>
         <Route path="/drivers" element={<DriversPage />} />
         <Route path="/packages" element={<PackagesPage />} />

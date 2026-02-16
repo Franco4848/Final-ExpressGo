@@ -1,6 +1,7 @@
 import { useMemo } from "react";
-import type {ReactNode} from "react"
+import type { ReactNode} from "react";
 import { Link as RouterLink, useLocation } from "react-router-dom";
+
 import {
   AppBar,
   Box,
@@ -8,6 +9,7 @@ import {
   CssBaseline,
   Divider,
   Drawer,
+  IconButton,
   List,
   ListItemButton,
   ListItemIcon,
@@ -22,6 +24,8 @@ import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import MapIcon from "@mui/icons-material/Map";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import LocalPostOfficeIcon from "@mui/icons-material/LocalPostOffice";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import LightModeIcon from "@mui/icons-material/LightMode";
 
 const drawerWidth = 260;
 
@@ -37,9 +41,17 @@ function getSectionLabel(pathname: string) {
   return item?.label ?? "ExpressGo";
 }
 
-export default function AppShell({ children }: { children: ReactNode }) {
+export default function AppShell({
+  children,
+  mode,
+  onToggleMode,
+}: {
+  children: ReactNode;
+  mode: "light" | "dark";
+  onToggleMode: () => void;
+}) {
+  // ✅ HOOKS ADENTRO DEL COMPONENTE
   const location = useLocation();
-
   const section = useMemo(
     () => getSectionLabel(location.pathname),
     [location.pathname]
@@ -74,7 +86,13 @@ export default function AppShell({ children }: { children: ReactNode }) {
             </Box>
           </Box>
 
-          <Chip label={section} color="primary" variant="outlined" />
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <IconButton onClick={onToggleMode} title="Cambiar tema">
+              {mode === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
+            </IconButton>
+
+            <Chip label={section} color="primary" variant="outlined" />
+          </Box>
         </Toolbar>
       </AppBar>
 

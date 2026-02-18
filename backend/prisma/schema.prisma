@@ -1,0 +1,52 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url = env("DATABASE_URL")
+}
+
+model Driver{
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  email     String    @unique
+  vehicle   String    // Moto, Auto, Camioneta
+  phone     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  // Relación: Un repartidor puede tener muchos paquetes
+  packages  Package[]
+  
+}
+
+model Package {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  trackingId    String   @unique // Código de envío (ej: ARG-123)
+  address       String   // Dirección de entrega
+  recipientName String   // Nombre destinatario
+  size          String   // C, M, G
+  status        String   @default("PENDIENTE") // PENDIENTE, EN_CAMINO, ENTREGADO
+  
+  // Geolocalización (Latitud y Longitud)
+  lat           Float
+  lng           Float
+  
+  // Orden de entrega (para la ruta)
+  deliveryOrder Int @default(0)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relación: Un paquete pertenece a un Repartidor (puede ser nulo si no se asignó aún)
+  driverId      String?  @db.ObjectId
+  driver        Driver?  @relation(fields: [driverId], references: [id])
+
+}
